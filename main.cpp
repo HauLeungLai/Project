@@ -7,12 +7,13 @@
 #include "portfolio.h"
 #include "stockFetcher.h"
 #include "user.h"
+#include "stockDisplay.h"
 
 // Global stock vector
-const std::vector<std::string> AVAILABLE_STOCKS = {"AAPL", "TSLA", "GOOG", "MSFT", "AMZN", "NFLX", "FB", "NVDA", "INTC", "AMD"};
+const std::vector<std::string> AVAILABLE_STOCKS = {"AAPL", "TSLA", "GOOG", "MSFT", "AMZN", "NFLX", "NVDA", "INTC", "AMD"};
 
 Portfolio portfolio;
-StockFetcher stockFetcher("3af9ca15a9f431b11e79114e5fb172e9f00f716d");  // API key
+StockFetcher stockFetcher("3af9ca15a9f431b11e79114e5fb172e9f00f716d");  
 std::map<std::string, std::string> users;  // Global user storage
 
 // Function to display available stocks with their current prices
@@ -137,6 +138,54 @@ void sellStock(const std::string& currentUser) {
     getch();
 }
 
+
+// Function to display stock chart
+void displayStockChart() {
+    clear();
+    printw("Enter stock ticker to display chart: ");
+    char buffer[10];
+    echo();
+    getnstr(buffer, 10);
+    noecho();
+    std::string ticker = buffer;
+
+    printw("Select timeframe (D)aily, (W)eekly, or (M)onthly: ");
+    char timeframeChoice = getch();
+    std::string startDate, endDate;
+    std::string timeframe;
+
+    switch (toupper(timeframeChoice)) {
+        case 'D':
+            startDate = "2023-10-01";
+            endDate = "2023-10-30";
+            timeframe = "daily";
+            break;
+        case 'W':
+            startDate = "2023-05-01";
+            endDate = "2023-10-30";
+            timeframe = "weekly";
+            break;
+        case 'M':
+            startDate = "2022-10-01";
+            endDate = "2023-10-30";
+            timeframe = "monthly";
+            break;
+        default:
+            printw("Invalid choice. Defaulting to daily view.\n");
+            startDate = "2023-10-01";
+            endDate = "2023-10-30";
+            timeframe = "daily";
+    }
+
+    try {
+        std::vector<StockData> stockData = stockFetcher.fetchStockData(ticker, startDate, endDate, timeframe);        double currentPrice = stockFetcher.fetchLatestPrice(ticker);
+        displayStockChartSFML(stockData, currentPrice, ticker);
+    } catch (const std::exception& e) {
+        printw("Error fetching stock data: %s\n", e.what());
+        getch();
+    }
+}
+
 // Main menu after login
 void dashboard(const std::string& currentUser) {
     int choice;
@@ -146,10 +195,12 @@ void dashboard(const std::string& currentUser) {
         printw("2. Buy Stock\n");
         printw("3. Sell Stock\n");
         printw("4. View Available Stocks\n");
-        printw("5. Logout\n");
-        refresh();
+        printw("5. Display Stock Chart\n");
+        printw("6. Logout\n");
+        printw("Enter your choice: ");
+        echo();  
         scanw("%d", &choice);
-
+        noecho();  
         switch (choice) {
             case 1:
                 portfolio.displayPortfolio();
@@ -165,20 +216,23 @@ void dashboard(const std::string& currentUser) {
                 getch();
                 break;
             case 5:
+                displayStockChart();
+                break;
+            case 6:
                 portfolio.savePortfolio(currentUser + "_portfolio.dat");
                 return;
             default:
                 printw("Invalid option. Try again.\n");
+                getch();
         }
-    } while (choice != 5);
+    } while (choice != 6);
 }
 
 // Entry point of the program
 int main() {
     initscr();
-    noecho();  // Disable echo for user input
-    cbreak();  // Disable input buffering
-    keypad(stdscr, TRUE);  // Enable special keys
+    cbreak();  
+    keypad(stdscr, TRUE);  
 
     // Load user data from file
     loadUsersFromFile(users);
@@ -192,9 +246,10 @@ int main() {
         printw("1. Login\n");
         printw("2. Register\n");
         printw("3. Exit\n");
-        refresh();
+        printw("Enter your choice: ");
+        echo();  
         scanw("%d", &choice);
-
+        noecho();  
         switch (choice) {
             case 1:
                 if (loginUser(users, currentUser)) {
@@ -209,6 +264,7 @@ int main() {
                 return 0;  // Exit the program
             default:
                 printw("Invalid choice. Try again.\n");
+                getch();
         }
     } while (choice != 3);
 

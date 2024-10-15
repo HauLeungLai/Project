@@ -34,6 +34,11 @@ public:
 
     // Get available cash
     double getAvailableCash() const { return availableCash; }
+
+    void removeStock(const std::string& ticker, int quantity, double price);  
+    
+    bool hasStock(const std::string& ticker) const;  
+
 };
 
 #endif

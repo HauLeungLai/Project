@@ -2,9 +2,8 @@
 #define STOCKDISPLAY_H
 
 #include <vector>
-#include "stockFetcher.h"  // Include stockFetcher to get access to StockData
+#include "stockFetcher.h"
 
 // Function to display the stock candlestick chart using SFML
-void displayStockChartSFML(const std::vector<StockData>& stockDataList);
-
+void displayStockChartSFML(const std::vector<StockData>& stockDataList, double currentPrice, const std::string& ticker);
 #endif

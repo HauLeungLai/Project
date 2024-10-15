@@ -20,11 +20,36 @@ void Portfolio::sellStock(const std::string& ticker, int quantity) {
             stocks[ticker] -= quantity;
             if (stocks[ticker] == 0) {
                 stocks.erase(ticker);  // Remove stock if quantity becomes 0
-                purchasePrices.erase(ticker);  // Remove associated purchase price
+                purchasePrices.erase(ticker); 
             }
         }
     }
 }
+void Portfolio::removeStock(const std::string& ticker, int quantity, double price) {
+    if (stocks.find(ticker) != stocks.end()) {
+        if (stocks[ticker] >= quantity) {
+            stocks[ticker] -= quantity;
+            // Add money back to the user's available cash
+            availableCash += price * quantity;
+
+            // Remove the stock if the quantity becomes 0
+            if (stocks[ticker] == 0) {
+                stocks.erase(ticker);
+            }
+
+            std::cout << "Sold " << quantity << " shares of " << ticker << " for $" << price * quantity << "\n";
+        } else {
+            std::cout << "You don't have enough shares to sell.\n";
+        }
+    } else {
+        std::cout << "You don't own this stock.\n";
+    }
+}
+
+bool Portfolio::hasStock(const std::string& ticker) const {
+    return stocks.find(ticker) != stocks.end() && stocks.at(ticker) > 0;
+}
+
 
 bool Portfolio::hasStock(const std::string& ticker, int quantity) {
     return stocks.find(ticker) != stocks.end() && stocks[ticker] >= quantity;
@@ -48,7 +73,7 @@ void Portfolio::loadPortfolio(const std::string& filename) {
     int quantity;
     double price;
     if (infile.is_open()) {
-        infile >> availableCash;  // Load available cash8
+        infile >> availableCash;  // Load available cash
         while (infile >> ticker >> quantity >> price) {
             stocks[ticker] = quantity;
             purchasePrices[ticker] = price;

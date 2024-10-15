@@ -17,13 +17,10 @@ private:
     std::string apiKey;
 
 public:
-    StockFetcher(const std::string& key) : apiKey(key) {}
+    StockFetcher(const std::string& key);
     ~StockFetcher();
 
-    // Fetch stock data for a given ticker
-    std::vector<StockData> fetchStockData(const std::string& ticker, const std::string& startDate, const std::string& endDate) const;
-
-    // Fetch the latest price for a stock
+    std::vector<StockData> fetchStockData(const std::string& ticker, const std::string& startDate, const std::string& endDate, const std::string& timeframe) const;
     double fetchLatestPrice(const std::string& ticker) const;
 
 private:
